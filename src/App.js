@@ -1,25 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react"
+import { UserSession, AppConfig } from "blockstack"
+import Login from "./login"
+import Logedin from "./logedin"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const appConfig = new AppConfig(["store_write"])
+const userSession = new UserSession({ appConfig: appConfig })
+
+
+class App extends React.Component {
+  UNSAFE_componentWillMount() {
+    if (userSession.isSignInPending()) {
+      userSession
+        .handlePendingSignIn()
+        .then(() => {
+          window.location = window.location.origin;
+        })
+        .catch(err => console.log(err));
+    }
+  }
+  render() {
+    return (
+      <div>
+        {userSession.isUserSignedIn() ? (
+          <Logedin userSession={userSession} />
+        ) : (
+          <Login userSession={userSession} />
+        )}
+      </div>
+    )
+  }
 }
 
-export default App;
+export default App
