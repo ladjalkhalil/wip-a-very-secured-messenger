@@ -5,12 +5,6 @@ import iconlens from "./images/iconlens.png"
 import { Person } from "blockstack"
 import ReactRoundedImage from "react-rounded-image";
 
-import { AppConfig, UserSession } from '@stacks/connect';
-import { Storage } from '@stacks/storage';
-
-const appConfig = new AppConfig(['store_write', 'publish_data']);
-const userSession = new UserSession({ appConfig });
-const storage = new Storage({ userSession });
 
 
 
@@ -54,10 +48,9 @@ handleAddMessageClick = e => {
   }
   const messages = [...this.state.messages]
   messages.push(newMessage)
-  let fileName = 'messages.json'
   const options = { encrypt: true }
-   this.props.userSession
-    .putFile(fileName, JSON.stringify(messages), options)
+  this.props.userSession
+    .putFile("messages.json", JSON.stringify(messages), options)
     .then(() => {
       this.setState({
         messages,
@@ -67,10 +60,9 @@ handleAddMessageClick = e => {
 }
 
 async fetchData() {
-  let fileName = 'messages.json'
   const options = { decrypt: true };
-  storage.getFile(fileName, options);
-  let messages = JSON.parse(fileName || "[]");
+  const file = await this.props.userSession.getFile("messages.json", options);
+  let messages = JSON.parse(file || "[]");
   this.setState({
     messages,
     user: new Person(this.props.userSession.loadUserData().profile)
